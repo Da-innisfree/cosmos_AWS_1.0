@@ -1,0 +1,240 @@
+
+--유저 테이블
+CREATE TABLE tbl_user (
+    user_email VARCHAR(100) primary key,
+    user_password VARCHAR(100),
+    user_name VARCHAR(50),
+    user_birthday VARCHAR(100),
+    user_phone VARCHAR(100) ,
+    user_gender VARCHAR(20) ,
+    user_regdate timestamp default sysdate(),
+    user_role int,
+    user_bank varchar(20), 
+    user_account varchar(100),
+    user_repay varchar(100)
+);
+
+--유저 주소 테이블
+CREATE TABLE tbl_address_info (
+    address_seq int AUTO_INCREMENT primary key,
+    user_email VARCHAR(100) not null,
+    post_code varchar(100) NULL,
+    address VARCHAR(200) NULL,
+    detail_address VARCHAR(200) NULL,
+    address_name varchar(100) null,
+    address_phone varchar(100) null,
+    address_phone2 varchar(100),
+    user_name varchar(100),
+    FOREIGN KEY(user_email) REFERENCES tbl_user(user_email)
+);
+
+--유저 로그 테이블
+CREATE TABLE tbl_user_log (
+    user_crud varchar(50)not null,
+    user_email VARCHAR(200) not null,
+    user_password VARCHAR(200) NOT NULL, 
+    user_name VARCHAR(200) NOT NULL,
+    user_birthday VARCHAR(200) NOT NULL, 
+    user_phone VARCHAR(200) NOT NULL, 
+    user_gender VARCHAR(50) NOT NULL, 
+    user_regdate timestamp not null default sysdate()
+);
+
+--유저 입력 트리거
+create trigger tbl_user_insert
+after insert  on tbl_user
+for each row
+begin
+insert into tbl_user_log(
+    user_crud,
+	user_email, 
+	user_password, 
+	user_name, 
+	user_birthday,
+	user_phone,
+    user_gender,
+    user_regdate
+    ) 
+    values(
+    'insert',
+    new.user_email ,
+	new.user_password, 
+	new.user_name,
+	new.user_birthday, 
+	new.user_phone,
+    new.user_gender,
+    sysdate()
+    );
+end
+
+--유저 정보 변경 트리거
+create trigger tbl_user_update
+after update on tbl_user
+for each row
+begin
+insert into tbl_user_log(
+    user_crud,
+	user_email, 
+	user_password, 
+	user_name, 
+	user_birthday,
+	user_phone,
+    user_gender,
+    user_regdate
+    ) 
+    values(
+    'update',
+    new.user_email ,
+	new.user_password, 
+	new.user_name,
+	new.user_birthday, 
+	new.user_phone,
+    new.user_gender,
+    sysdate()
+    );
+end
+
+--유저 삭제 트리거
+create trigger tbl_user_delete
+after delete on tbl_user
+for each row
+begin
+insert into tbl_user_log(
+    user_crud,
+	user_email, 
+	user_password, 
+	user_name, 
+	user_birthday,
+	user_phone,
+    user_gender,
+    user_regdate
+    ) 
+    values(
+   'delete',
+    old.user_email ,
+	old.user_password, 
+	old.user_name,
+	old.user_birthday, 
+	old.user_phone,
+    old.user_gender,
+     sysdate()
+    );
+end
+
+--상품
+CREATE TABLE tbl_product (
+   product_seq int AUTO_INCREMENT primary key,
+   product_id int NOT NULL,
+   product_title VARCHAR(100) NOT NULL,
+   product_price int NOT NULL,
+   product_img VARCHAR(500) NOT NULL,
+   product_size VARCHAR(100) NULL,
+   product_color VARCHAR(100) NULL,
+   product_gender VARCHAR(100) NOT NULL,
+   product_content VARCHAR(100) NULL, 
+   product_material VARCHAR(100) NULL,
+   product_category VARCHAR(50) NULL,
+   product_date timestamp default sysdate()
+);
+
+    
+    
+-- 상품옵션
+CREATE TABLE tbl_product_option (
+   product_seq int AUTO_INCREMENT NULL,
+   product_id int NULL,
+   product_stock int NULL,
+   product_saled int NULL,
+    FOREIGN KEY(product_seq) REFERENCES tbl_product(product_seq)
+);
+  
+    
+    
+-- 주문
+create table tbl_order (
+    order_id   varchar(50) primary key,
+    user_email      VARCHAR(200) not null,
+    post_code varchar(100) not null,
+    address   varchar(100) not null,
+    detail_address varchar(100) not null,
+    order_product_amount int       not null,
+    total_price int not null,
+    order_status varchar(20) default '배송준비중',
+    order_date   varchar(50) default DATE_FORMAT(now(), '%Y.%m.%d %H:%i'),   
+    FOREIGN KEY(user_email) REFERENCES tbl_user(user_email),
+    pay_info varchar(100) default '카카오페이',
+    user_name varchar(100)
+);
+
+
+-- 주문 상세
+create table tbl_order_detail (
+    order_detail_num int AUTO_INCREMENT primary key,
+    order_id     varchar(50) not null,
+    product_seq int not null,
+    money int       not null,
+    amount int not null,
+    FOREIGN KEY(order_id) REFERENCES tbl_order(order_id),
+    FOREIGN KEY(product_seq) REFERENCES tbl_product(product_seq)
+);
+
+
+--장바구니 테이블 생성
+create table tbl_cart(
+cart_id int not null AUTO_INCREMENT primary key,
+user_email varchar(100) not null,
+FOREIGN KEY(user_email) REFERENCES tbl_user(user_email),
+product_seq int not null,
+FOREIGN KEY(product_seq) REFERENCES tbl_product(product_seq),
+amount int default 0
+);
+
+--채팅 테이블
+create table tbl_chat(
+    chat_id int not null AUTO_INCREMENT primary key,
+    from_email varchar(100),
+    to_email varchar(100),
+    chat_content varchar(1000),
+    chat_time varchar(50) default DATE_FORMAT(now(), '%Y.%m.%d %H:%i')
+);
+
+---------------------------세션관리 테이블(자동 생성)----------------------
+create table SPRING_SESSION(
+    PRIMARY_ID, 
+    SESSION_ID, 
+    CREATION_TIME, 
+    LAST_ACCESS_TIME, 
+    MAX_INACTIVE_INTERVAL, 
+    EXPIRY_TIME, 
+    PRINCIPAL_NAME
+) 
+
+drop table SPRING_SESSION;
+drop index SPRING_SESSION_IX1;
+drop index SPRING_SESSION_IX2;
+drop index SPRING_SESSION_IX3;
+
+CREATE TABLE SPRING_SESSION (
+    PRIMARY_ID CHAR(36) NOT NULL,
+    SESSION_ID CHAR(36) NOT NULL,
+    CREATION_TIME BIGINT NOT NULL,
+    LAST_ACCESS_TIME BIGINT NOT NULL,
+    MAX_INACTIVE_INTERVAL INT NOT NULL,
+    EXPIRY_TIME BIGINT NOT NULL,
+    PRINCIPAL_NAME VARCHAR(100),
+    CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID)
+);
+
+CREATE UNIQUE INDEX SPRING_SESSION_IX1 ON SPRING_SESSION (SESSION_ID);
+CREATE INDEX SPRING_SESSION_IX2 ON SPRING_SESSION (EXPIRY_TIME);
+CREATE INDEX SPRING_SESSION_IX3 ON SPRING_SESSION (PRINCIPAL_NAME);
+
+CREATE TABLE SPRING_SESSION_ATTRIBUTES (
+    SESSION_PRIMARY_ID CHAR(36) NOT NULL,
+    ATTRIBUTE_NAME VARCHAR(200) NOT NULL,
+    ATTRIBUTE_BYTES VARBINARY NOT NULL,
+    CONSTRAINT SPRING_SESSION_ATTRIBUTES_PK PRIMARY KEY (SESSION_PRIMARY_ID, ATTRIBUTE_NAME),
+    CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
+);
+
+------------------------------------------------------------------------
